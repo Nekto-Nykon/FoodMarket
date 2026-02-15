@@ -1,0 +1,417 @@
+/* Navbar */
+.navbar {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.9) !important;
+  margin-left: 1rem;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: white !important;
+}
+
+/* Main Container */
+.my-orders-container {
+  padding: 2rem 1rem;
+  max-width: 900px;
+}
+
+.my-orders-container h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.my-orders-container h2 i {
+  color: #28a745;
+}
+
+/* Orders List */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eee;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-number {
+  font-weight: 600;
+  color: #333;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.order-status {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.order-status.large {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-processing {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-shipped {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-delivered {
+  background: #28a745;
+  color: white;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.order-body {
+  padding: 1rem 1.25rem;
+}
+
+.order-items-preview {
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.order-address {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.order-address i {
+  color: #28a745;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.order-total {
+  font-size: 1.1rem;
+  color: #28a745;
+}
+
+.order-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #ccc;
+}
+
+.empty-state h4 {
+  margin-top: 1rem;
+  color: #333;
+}
+
+.empty-state p {
+  color: #666;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content.modal-lg {
+  max-width: 700px;
+}
+
+.modal-header {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h5 {
+  margin: 0;
+}
+
+.modal-header .btn-close {
+  filter: brightness(0) invert(1);
+}
+
+.review-header {
+  background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%);
+  color: #333;
+}
+
+.review-header .btn-close {
+  filter: none;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Order Details Modal Sections */
+.order-status-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.order-date-full {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.delivery-section,
+.items-section,
+.reviews-section {
+  margin-bottom: 1.5rem;
+}
+
+.delivery-section h6,
+.items-section h6,
+.reviews-section h6 {
+  color: #28a745;
+  margin-bottom: 0.75rem;
+}
+
+.delivery-section p {
+  margin: 0;
+  color: #333;
+}
+
+.items-section .table {
+  margin: 0;
+}
+
+.items-section .table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.items-section .table td {
+  vertical-align: middle;
+}
+
+.total-amount {
+  color: #28a745;
+  font-size: 1.1rem;
+}
+
+/* Suppliers Review List */
+.suppliers-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.supplier-review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.supplier-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.supplier-info i {
+  color: #28a745;
+}
+
+.reviewed-badge {
+  color: #28a745;
+  font-size: 0.9rem;
+}
+
+.reviewed-badge i {
+  margin-right: 0.25rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  margin-top: 1rem;
+}
+
+/* Review Modal */
+.rating-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.rating-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.star-icon {
+  font-size: 2rem;
+  cursor: pointer;
+  color: #ddd;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.star-icon.active,
+.star-icon.bi-star-fill {
+  color: #ffc107;
+}
+
+.star-icon:hover {
+  transform: scale(1.1);
+}
+
+.rating-text {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.comment-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.comment-section textarea {
+  resize: none;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .order-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .order-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .supplier-review-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

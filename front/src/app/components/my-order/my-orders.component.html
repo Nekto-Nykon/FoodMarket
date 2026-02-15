@@ -1,0 +1,262 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/catalog">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" routerLink="/catalog">
+        <i class="bi bi-grid"></i> Каталог
+      </a>
+      <a class="nav-link" routerLink="/cart">
+        <i class="bi bi-cart"></i> Кошик
+      </a>
+      <a class="nav-link active" routerLink="/my-orders">
+        <i class="bi bi-box"></i> Мої замовлення
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container my-orders-container">
+  <h2><i class="bi bi-box-seam"></i> Мої замовлення</h2>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+    <i class="bi bi-check-circle"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = null"></button>
+  </div>
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-success" role="status"></div>
+    <p class="mt-2">Завантаження замовлень...</p>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!loading && orders.length > 0" class="orders-list">
+    <div class="order-card" *ngFor="let order of orders">
+      <div class="order-header">
+        <div class="order-info">
+          <span class="order-number">Замовлення #{{ order.id }}</span>
+          <span class="order-date">{{ order.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+        </div>
+        <span class="order-status" [ngClass]="getStatusClass(order.status)">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <div class="order-body">
+        <div class="order-items-preview">
+          <span *ngFor="let item of order.orderItems?.slice(0, 3); let i = index">
+            {{ item.ingredientName }}<span *ngIf="i < 2 && i < (order.orderItems?.length || 0) - 1">, </span>
+          </span>
+          <span *ngIf="(order.orderItems?.length || 0) > 3">... (+{{ (order.orderItems?.length || 0) - 3 }})</span>
+        </div>
+        <div class="order-address">
+          <i class="bi bi-geo-alt"></i> {{ order.deliveryAddress }}
+        </div>
+      </div>
+
+      <div class="order-footer">
+        <div class="order-total">
+          <strong>{{ order.totalAmount | number:'1.2-2' }} грн</strong>
+        </div>
+        <div class="order-actions">
+          <button class="btn btn-outline-primary btn-sm" (click)="viewOrderDetails(order)">
+            <i class="bi bi-eye"></i> Деталі
+          </button>
+
+          <!-- Confirm Delivery button - for PENDING orders -->
+          <button
+            *ngIf="order.status === 'PENDING'"
+            class="btn btn-success btn-sm"
+            (click)="confirmDeliveryAndReview(order)"
+          >
+            <i class="bi bi-check-circle"></i> Отримав
+          </button>
+
+          <!-- Cancel button - for PENDING orders -->
+          <button
+            *ngIf="order.status === 'PENDING'"
+            class="btn btn-outline-danger btn-sm"
+            (click)="cancelOrder(order)"
+          >
+            <i class="bi bi-x-circle"></i> Скасувати
+          </button>
+
+          <!-- Leave Review button - for DELIVERED orders -->
+          <button
+            *ngIf="order.status === 'DELIVERED'"
+            class="btn btn-warning btn-sm"
+            (click)="openReviewsForOrder(order)"
+          >
+            <i class="bi bi-star"></i> Залишити відгук
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && orders.length === 0" class="empty-state">
+    <i class="bi bi-box"></i>
+    <h4>У вас ще немає замовлень</h4>
+    <p>Перейдіть до каталогу, щоб зробити перше замовлення</p>
+    <button class="btn btn-success" (click)="goToCatalog()">
+      <i class="bi bi-grid"></i> Перейти до каталогу
+    </button>
+  </div>
+</div>
+
+<!-- ==================== ORDER DETAILS MODAL ==================== -->
+<div class="modal-overlay" *ngIf="showOrderModal" (click)="closeOrderModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5><i class="bi bi-box-seam"></i> Замовлення #{{ selectedOrder?.id }}</h5>
+      <button type="button" class="btn-close" (click)="closeOrderModal()"></button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedOrder">
+      <!-- Order Status -->
+      <div class="order-status-section">
+        <span class="order-status large" [ngClass]="getStatusClass(selectedOrder.status)">
+          {{ getStatusLabel(selectedOrder.status) }}
+        </span>
+        <span class="order-date-full">
+          Створено: {{ selectedOrder.createdAt | date:'dd.MM.yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="delivery-section">
+        <h6><i class="bi bi-geo-alt"></i> Адреса доставки</h6>
+        <p>{{ selectedOrder.deliveryAddress }}</p>
+      </div>
+
+      <!-- Order Items -->
+      <div class="items-section">
+        <h6><i class="bi bi-list-ul"></i> Товари</h6>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Товар</th>
+              <th>Кількість</th>
+              <th>Ціна</th>
+              <th>Сума</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let item of selectedOrder.orderItems">
+              <td>{{ item.ingredientName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.pricePerUnit | number:'1.2-2' }} грн</td>
+              <td><strong>{{ item.subtotal | number:'1.2-2' }} грн</strong></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+              <td colspan="3" class="text-end"><strong>Загалом:</strong></td>
+              <td><strong class="total-amount">{{ selectedOrder.totalAmount | number:'1.2-2' }} грн</strong></td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reviews Section (only for DELIVERED orders) -->
+      <div class="reviews-section" *ngIf="selectedOrder.status === 'DELIVERED'">
+        <h6><i class="bi bi-star"></i> Залишити відгук</h6>
+        <p class="text-muted">Оцініть постачальників цього замовлення:</p>
+
+        <div class="suppliers-review-list">
+          <div class="supplier-review-item" *ngFor="let supplier of getUniqueSuppliers()">
+            <div class="supplier-info">
+              <i class="bi bi-building"></i>
+              <span>{{ supplier.companyName }}</span>
+            </div>
+            <div class="supplier-action">
+              <span *ngIf="hasReviewed(supplier.id)" class="reviewed-badge">
+                <i class="bi bi-check-circle-fill"></i> Відгук залишено
+              </span>
+              <button
+                *ngIf="canReview(selectedOrder, supplier.id)"
+                class="btn btn-outline-warning btn-sm"
+                (click)="openReviewModal(selectedOrder.id, supplier.id, supplier.companyName)"
+              >
+                <i class="bi bi-star"></i> Залишити відгук
+              </button>
+            </div>
+          </div>
+          <div *ngIf="orderSuppliers.length === 0" class="text-muted text-center py-2">
+            Завантаження постачальників...
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions" *ngIf="selectedOrder.status === 'SHIPPED'">
+        <button class="btn btn-success" (click)="confirmDelivery(selectedOrder)">
+          <i class="bi bi-check-circle"></i> Підтвердити отримання
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeOrderModal()">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REVIEW MODAL ==================== -->
+<div class="modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header review-header">
+      <h5><i class="bi bi-star"></i> Відгук про {{ reviewSupplierName }}</h5>
+      <button type="button" class="btn-close btn-close-white" (click)="closeReviewModal()"></button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Rating Stars -->
+      <div class="rating-section">
+        <label>Оцінка:</label>
+        <div class="star-rating">
+          <i
+            *ngFor="let star of [1, 2, 3, 4, 5]"
+            class="bi star-icon"
+            [class.bi-star-fill]="star <= reviewRating"
+            [class.bi-star]="star > reviewRating"
+            [class.active]="star <= reviewRating"
+            (click)="setRating(star)"
+          ></i>
+        </div>
+        <span class="rating-text">{{ reviewRating }} з 5</span>
+      </div>
+
+      <!-- Comment -->
+      <div class="comment-section">
+        <label for="reviewComment">Коментар (необов'язково):</label>
+        <textarea
+          id="reviewComment"
+          class="form-control"
+          [(ngModel)]="reviewComment"
+          rows="4"
+          placeholder="Напишіть ваші враження про постачальника..."
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeReviewModal()">Скасувати</button>
+      <button class="btn btn-warning" (click)="submitReview()">
+        <i class="bi bi-send"></i> Надіслати відгук
+      </button>
+    </div>
+  </div>
+</div>

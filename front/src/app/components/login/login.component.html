@@ -1,0 +1,137 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link active" routerLink="/login">
+            <i class="bi bi-box-arrow-in-right"></i> Вхід
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/register">
+            <i class="bi bi-person-plus"></i> Реєстрація
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Login Form -->
+<div class="login-container">
+  <div class="container">
+    <div class="login-card">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <h2>Вхід в систему</h2>
+          <p>FoodMarket B2B Platform</p>
+        </div>
+        <div class="card-body">
+          <!-- Success Message -->
+          <div *ngIf="success" class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle-fill"></i> {{ success }}
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-envelope"></i> Email адреса
+              </label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="your@email.com"
+                [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('email', 'required')">
+                Email є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('email', 'email')">
+                Введіть коректний email
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-lock"></i> Пароль
+              </label>
+              <input
+                type="password"
+                class="form-control"
+                formControlName="password"
+                placeholder="••••••••"
+                [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('password', 'required')">
+                Пароль є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('password', 'minlength')">
+                Пароль повинен містити мінімум 6 символів
+              </div>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="forgot-password">
+              <a href="#" (click)="$event.preventDefault()">Забули пароль?</a>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="btn btn-login"
+              [disabled]="loading"
+            >
+              <span *ngIf="!loading">
+                <i class="bi bi-box-arrow-in-right"></i> Увійти
+              </span>
+              <span *ngIf="loading">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Вхід...
+              </span>
+            </button>
+
+            <!-- Register Link -->
+            <div class="register-link">
+              <p>Ще не маєте облікового запису?
+                <a routerLink="/register">Зареєструватися</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <p>
+        <i class="bi bi-c-circle"></i> 2025 FoodMarket. Всі права захищені.
+      </p>
+      <div class="footer-links">
+        <a href="#">Про нас</a>
+        <a href="#">Контакти</a>
+        <a href="#">Умови використання</a>
+        <a href="#">Політика конфіденційності</a>
+      </div>
+    </div>
+  </div>
+</footer>

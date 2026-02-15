@@ -1,0 +1,475 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/admin">
+      <i class="bi bi-shield-lock"></i> FoodMarket Admin
+    </a>
+    <div class="navbar-nav ms-auto align-items-center">
+      <button class="btn btn-outline-light btn-sm me-3" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Вийти
+      </button>
+      <div class="user-avatar">{{ getUserInitials() }}</div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid main-content">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar">
+      <div class="sidebar-menu">
+        <button
+          class="menu-item"
+          [class.active]="activeTab === 'categories'"
+          (click)="switchTab('categories')"
+        >
+          <i class="bi bi-grid"></i> Категорії
+        </button>
+        <button
+          class="menu-item"
+          [class.active]="activeTab === 'ingredients'"
+          (click)="switchTab('ingredients')"
+        >
+          <i class="bi bi-box"></i> Інгредієнти
+        </button>
+        <button
+          class="menu-item"
+          [class.active]="activeTab === 'offers'"
+          (click)="switchTab('offers')"
+        >
+          <i class="bi bi-tag"></i> Пропозиції
+        </button>
+        <button
+          class="menu-item"
+          [class.active]="activeTab === 'suppliers'"
+          (click)="switchTab('suppliers')"
+        >
+          <i class="bi bi-building"></i> Постачальники
+        </button>
+        <button
+          class="menu-item"
+          [class.active]="activeTab === 'users'"
+          (click)="switchTab('users')"
+        >
+          <i class="bi bi-people"></i> Користувачі
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="col-md-10 content-area">
+      <!-- Messages -->
+      <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle"></i> {{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = null"></button>
+      </div>
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle"></i> {{ error }}
+        <button type="button" class="btn-close" (click)="error = null"></button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Завантаження...</p>
+      </div>
+
+      <!-- ==================== CATEGORIES TAB ==================== -->
+      <div *ngIf="activeTab === 'categories' && !loading">
+        <div class="tab-header">
+          <h2><i class="bi bi-grid"></i> Категорії</h2>
+          <button class="btn btn-primary" (click)="openModal('category')">
+            <i class="bi bi-plus-circle"></i> Додати категорію
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Назва</th>
+              <th>Опис</th>
+              <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let category of categories">
+              <td>{{ category.id }}</td>
+              <td><strong>{{ category.name }}</strong></td>
+              <td>{{ category.description || '—' }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteCategory(category.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="categories.length === 0" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Категорій немає</p>
+        </div>
+      </div>
+
+      <!-- ==================== INGREDIENTS TAB ==================== -->
+      <div *ngIf="activeTab === 'ingredients' && !loading">
+        <div class="tab-header">
+          <h2><i class="bi bi-box"></i> Інгредієнти</h2>
+          <button class="btn btn-primary" (click)="openModal('ingredient')">
+            <i class="bi bi-plus-circle"></i> Додати інгредієнт
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Назва</th>
+              <th>Категорія</th>
+              <th>Од. виміру</th>
+              <th>Опис</th>
+              <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let ingredient of ingredients">
+              <td>{{ ingredient.id }}</td>
+              <td><strong>{{ ingredient.name }}</strong></td>
+              <td>
+                <span class="badge bg-secondary">{{ ingredient.category?.name || '—' }}</span>
+              </td>
+              <td>{{ ingredient.unitOfMeasure }}</td>
+              <td>{{ ingredient.description || '—' }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteIngredient(ingredient.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="ingredients.length === 0" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Інгредієнтів немає</p>
+        </div>
+      </div>
+
+      <!-- ==================== OFFERS TAB ==================== -->
+      <div *ngIf="activeTab === 'offers' && !loading">
+        <div class="tab-header">
+          <h2><i class="bi bi-tag"></i> Пропозиції</h2>
+          <span class="badge bg-info">Всього: {{ offers.length }}</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Інгредієнт</th>
+              <th>Постачальник</th>
+              <th>Ціна</th>
+              <th>Доступно</th>
+              <th>Статус</th>
+              <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let offer of offers">
+              <td>{{ offer.id }}</td>
+              <td><strong>{{ offer.ingredient?.name }}</strong></td>
+              <td>{{ offer.supplier?.companyName }}</td>
+              <td>{{ offer.price }} грн</td>
+              <td>{{ offer.availableQuantity }} {{ offer.ingredient?.unitOfMeasure }}</td>
+              <td>
+                  <span class="badge" [class.bg-success]="offer.isActive" [class.bg-secondary]="!offer.isActive">
+                    {{ offer.isActive ? 'Активна' : 'Неактивна' }}
+                  </span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm"
+                  [class.btn-outline-warning]="offer.isActive"
+                  [class.btn-outline-success]="!offer.isActive"
+                  (click)="toggleOfferStatus(offer)"
+                >
+                  <i class="bi" [class.bi-pause]="offer.isActive" [class.bi-play]="!offer.isActive"></i>
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="offers.length === 0" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Пропозицій немає</p>
+        </div>
+      </div>
+
+      <!-- ==================== SUPPLIERS TAB ==================== -->
+      <div *ngIf="activeTab === 'suppliers' && !loading">
+        <div class="tab-header">
+          <h2><i class="bi bi-building"></i> Постачальники</h2>
+          <span class="badge bg-info">Всього: {{ suppliers.length }}</span>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4" *ngFor="let supplier of suppliers">
+            <div class="supplier-card">
+              <div class="supplier-header">
+                <h5>{{ supplier.companyName }}</h5>
+                <div class="rating" *ngIf="supplier.rating != null && supplier.rating > 0">
+                  <i class="bi bi-star-fill"></i> {{ supplier.rating | number:'1.1-1' }}
+                </div>
+              </div>
+              <div class="supplier-body">
+                <p><i class="bi bi-geo-alt"></i> {{ supplier.address || 'Адреса не вказана' }}</p>
+                <p><i class="bi bi-credit-card"></i> ЄДРПОУ: {{ supplier.taxId || 'не вказано' }}</p>
+                <p *ngIf="supplier.description"><i class="bi bi-info-circle"></i> {{ supplier.description }}</p>
+              </div>
+              <div class="supplier-footer">
+                <button class="btn btn-primary btn-sm" (click)="viewSupplierDetails(supplier)">
+                  <i class="bi bi-eye"></i> Детальніше
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="suppliers.length === 0" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Постачальників немає</p>
+        </div>
+      </div>
+
+      <!-- ==================== USERS TAB ==================== -->
+      <div *ngIf="activeTab === 'users' && !loading">
+        <div class="tab-header">
+          <h2><i class="bi bi-people"></i> Статистика користувачів</h2>
+          <span class="badge bg-info">Всього: {{ users.length }}</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Ім'я</th>
+              <th>Роль</th>
+              <th>Статус</th>
+              <th>Замовлень / Пропозицій</th>
+              <th>Сума</th>
+              <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.id }}</td>
+              <td><strong>{{ user.email }}</strong></td>
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>
+                  <span class="role-badge"
+                        [class.role-admin]="user.role?.toLowerCase() === 'admin'"
+                        [class.role-supplier]="user.role?.toLowerCase() === 'supplier'"
+                        [class.role-buyer]="user.role?.toLowerCase() === 'buyer'"
+                  >
+                    {{ user.role }}
+                  </span>
+              </td>
+              <td>
+                  <span class="badge" [class.bg-success]="user.isActive" [class.bg-secondary]="!user.isActive">
+                    {{ user.isActive ? 'Активний' : 'Неактивний' }}
+                  </span>
+              </td>
+              <td>
+                <span *ngIf="user.role?.toLowerCase() === 'buyer'">{{ user.totalOrders || 0 }} замовлень</span>
+                <span *ngIf="user.role?.toLowerCase() === 'supplier'">{{ user.totalOffers || 0 }} пропозицій</span>
+                <span *ngIf="user.role?.toLowerCase() === 'admin'">—</span>
+              </td>
+              <td>
+                <span *ngIf="user.role?.toLowerCase() === 'buyer'">{{ user.totalSpent || 0 }} грн</span>
+                <span *ngIf="user.role?.toLowerCase() === 'supplier'">{{ user.totalSales || 0 }} грн</span>
+                <span *ngIf="user.role?.toLowerCase() === 'admin'">—</span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm"
+                  [class.btn-outline-warning]="user.isActive"
+                  [class.btn-outline-success]="!user.isActive"
+                  (click)="toggleUserStatus(user)"
+                  [disabled]="user.role?.toLowerCase() === 'admin'"
+                >
+                  <i class="bi" [class.bi-person-slash]="user.isActive" [class.bi-person-check]="!user.isActive"></i>
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="users.length === 0" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>Користувачів немає</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Category/Ingredient Modal -->
+<div class="modal-overlay" *ngIf="showModal && (modalType === 'category' || modalType === 'ingredient')" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5>
+        <i class="bi" [class.bi-grid]="modalType === 'category'" [class.bi-box]="modalType === 'ingredient'"></i>
+        {{ modalType === 'category' ? 'Нова категорія' : 'Новий інгредієнт' }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeModal()"></button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Category Form -->
+      <div *ngIf="modalType === 'category'">
+        <div class="mb-3">
+          <label class="form-label">Назва *</label>
+          <input type="text" class="form-control" [(ngModel)]="newCategory.name" placeholder="Назва категорії">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Опис</label>
+          <textarea class="form-control" [(ngModel)]="newCategory.description" rows="3" placeholder="Опис категорії"></textarea>
+        </div>
+      </div>
+
+      <!-- Ingredient Form -->
+      <div *ngIf="modalType === 'ingredient'">
+        <div class="mb-3">
+          <label class="form-label">Назва *</label>
+          <input type="text" class="form-control" [(ngModel)]="newIngredient.name" placeholder="Назва інгредієнта">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Категорія *</label>
+          <select class="form-select" [(ngModel)]="selectedCategoryId">
+            <option [ngValue]="null">Оберіть категорію</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Одиниця виміру *</label>
+          <select class="form-select" [(ngModel)]="newIngredient.unitOfMeasure">
+            <option *ngFor="let unit of unitsOfMeasure" [value]="unit">{{ unit }}</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Опис</label>
+          <textarea class="form-control" [(ngModel)]="newIngredient.description" rows="3" placeholder="Опис інгредієнта"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Скасувати</button>
+      <button class="btn btn-primary" (click)="modalType === 'category' ? createCategory() : createIngredient()">
+        <i class="bi bi-plus-circle"></i> Створити
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Details Modal -->
+<div class="modal-overlay" *ngIf="showModal && modalType === 'supplier'" (click)="closeModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5><i class="bi bi-building"></i> {{ selectedSupplier?.companyName }}</h5>
+      <button type="button" class="btn-close" (click)="closeModal()"></button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedSupplier">
+      <!-- Supplier Info -->
+      <div class="supplier-info-section">
+        <h6><i class="bi bi-info-circle"></i> Інформація</h6>
+        <div class="info-grid">
+          <div><strong>Компанія:</strong> {{ selectedSupplier.companyName }}</div>
+          <div><strong>Адреса:</strong> {{ selectedSupplier.address || '—' }}</div>
+          <div><strong>ЄДРПОУ:</strong> {{ selectedSupplier.taxId || '—' }}</div>
+          <div><strong>Рейтинг:</strong> {{ selectedSupplier.rating != null && selectedSupplier.rating > 0 ? (selectedSupplier.rating | number:'1.1-1') : 'Немає' }}</div>
+          <div *ngIf="selectedSupplier.description" class="description-full"><strong>Опис:</strong> {{ selectedSupplier.description }}</div>
+        </div>
+      </div>
+
+      <!-- Supplier Offers -->
+      <div class="supplier-offers-section mt-4">
+        <h6><i class="bi bi-tag"></i> Пропозиції ({{ supplierOffers.length }})</h6>
+        <div class="table-responsive" *ngIf="supplierOffers.length > 0">
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>Інгредієнт</th>
+              <th>Ціна</th>
+              <th>Доступно</th>
+              <th>Статус</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let offer of supplierOffers">
+              <td>{{ offer.ingredient?.name }}</td>
+              <td>{{ offer.price }} грн</td>
+              <td>{{ offer.availableQuantity }}</td>
+              <td>
+                  <span class="badge" [class.bg-success]="offer.isActive" [class.bg-secondary]="!offer.isActive">
+                    {{ offer.isActive ? 'Активна' : 'Неактивна' }}
+                  </span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <p *ngIf="supplierOffers.length === 0" class="text-muted">Пропозицій немає</p>
+      </div>
+
+      <!-- Reviews Section (від buyers) -->
+      <div class="reviews-section mt-4">
+        <h6><i class="bi bi-chat-dots"></i> Відгуки покупців ({{ supplierReviews.length }})</h6>
+
+        <!-- Reviews List -->
+        <div class="reviews-list">
+          <div class="review-item" *ngFor="let review of supplierReviews">
+            <div class="review-header">
+              <div class="review-author">
+                <strong>{{ review.buyerName || review.buyerEmail }}</strong>
+                <span class="review-date">{{ review.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+              </div>
+              <div class="review-rating">
+                <i class="bi bi-star-fill" *ngFor="let star of [1,2,3,4,5]; let i = index"
+                   [class.text-warning]="i < review.rating"
+                   [class.text-muted]="i >= review.rating"></i>
+                <span class="ms-1">({{ review.rating }}/5)</span>
+              </div>
+            </div>
+            <div class="review-body">{{ review.comment || 'Без коментаря' }}</div>
+            <div class="review-order text-muted">
+              <small><i class="bi bi-box"></i> Замовлення #{{ review.orderId }}</small>
+            </div>
+          </div>
+          <p *ngIf="supplierReviews.length === 0" class="text-muted text-center py-3">
+            <i class="bi bi-chat-dots"></i> Відгуків поки немає
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Закрити</button>
+    </div>
+  </div>
+</div>

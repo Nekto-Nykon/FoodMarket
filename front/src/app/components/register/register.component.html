@@ -1,0 +1,213 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/login">
+            <i class="bi bi-box-arrow-in-right"></i> Вхід
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" routerLink="/register">
+            <i class="bi bi-person-plus"></i> Реєстрація
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Registration Form -->
+<div class="register-container">
+  <div class="container">
+    <div class="register-card">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-person-plus-fill"></i>
+          <h2>Реєстрація</h2>
+          <p class="mb-0">Створіть обліковий запис на FoodMarket</p>
+        </div>
+        <div class="card-body">
+          <!-- Success Message -->
+          <div *ngIf="success" class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle-fill"></i> {{ success }}
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+          </div>
+
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <!-- First Name -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-person"></i> Ім'я
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="firstName"
+                placeholder="Введіть ваше ім'я"
+                [class.is-invalid]="hasError('firstName', 'required') || hasError('firstName', 'minlength')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('firstName', 'required')">
+                Ім'я є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('firstName', 'minlength')">
+                Ім'я повинно містити мінімум 2 символи
+              </div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-person"></i> Прізвище
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="lastName"
+                placeholder="Введіть ваше прізвище"
+                [class.is-invalid]="hasError('lastName', 'required') || hasError('lastName', 'minlength')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('lastName', 'required')">
+                Прізвище є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('lastName', 'minlength')">
+                Прізвище повинно містити мінімум 2 символи
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-envelope"></i> Email адреса
+              </label>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="your@email.com"
+                [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')"
+              >
+              <div class="form-text">Буде використовуватись для входу в систему</div>
+              <div class="invalid-feedback" *ngIf="hasError('email', 'required')">
+                Email є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('email', 'email')">
+                Введіть коректний email
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-telephone"></i> Номер телефону
+              </label>
+              <input
+                type="tel"
+                class="form-control"
+                formControlName="phone"
+                placeholder="+380 XX XXX XX XX"
+                [class.is-invalid]="hasError('phone', 'required') || hasError('phone', 'pattern')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('phone', 'required')">
+                Номер телефону є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('phone', 'pattern')">
+                Введіть коректний номер телефону
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="bi bi-lock"></i> Пароль
+              </label>
+              <input
+                type="password"
+                class="form-control"
+                formControlName="password"
+                placeholder="Мінімум 6 символів"
+                [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength')"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('password', 'required')">
+                Пароль є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="hasError('password', 'minlength')">
+                Пароль повинен містити мінімум 6 символів
+              </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4">
+              <label class="form-label">
+                <i class="bi bi-lock-fill"></i> Підтвердження паролю
+              </label>
+              <input
+                type="password"
+                class="form-control"
+                formControlName="confirmPassword"
+                placeholder="Повторіть пароль"
+                [class.is-invalid]="hasError('confirmPassword', 'required') || passwordMismatch"
+              >
+              <div class="invalid-feedback" *ngIf="hasError('confirmPassword', 'required')">
+                Підтвердження паролю є обов'язковим
+              </div>
+              <div class="invalid-feedback" *ngIf="passwordMismatch">
+                Паролі не співпадають
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="btn btn-register"
+              [disabled]="loading"
+            >
+              <span *ngIf="!loading">
+                <i class="bi bi-check-circle"></i> Зареєструватися
+              </span>
+              <span *ngIf="loading">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Реєстрація...
+              </span>
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link">
+              <p>Вже маєте обліковий запис?
+                <a routerLink="/login">Увійти</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <p>
+        <i class="bi bi-c-circle"></i> 2025 FoodMarket. Всі права захищені.
+      </p>
+      <div class="footer-links">
+        <a href="#">Про нас</a>
+        <a href="#">Контакти</a>
+        <a href="#">Умови використання</a>
+        <a href="#">Політика конфіденційності</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,177 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/buyer">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-3">
+          <button class="btn btn-outline-light btn-sm" (click)="logout()">
+            <i class="bi bi-box-arrow-right"></i> Вийти
+          </button>
+        </li>
+        <li class="nav-item">
+          <div class="user-avatar">{{ getUserInitials() }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container main-content">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex align-items-center">
+      <button class="btn btn-outline-secondary me-3" (click)="continueShopping()">
+        <i class="bi bi-arrow-left"></i> До каталогу
+      </button>
+      <h1><i class="bi bi-cart3"></i> Кошик</h1>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Empty Cart -->
+  <div *ngIf="cartItems.length === 0 && !successMessage" class="empty-cart">
+    <i class="bi bi-cart-x"></i>
+    <h3>Кошик порожній</h3>
+    <p>Додайте товари з каталогу</p>
+    <button class="btn btn-primary btn-lg" (click)="continueShopping()">
+      <i class="bi bi-basket"></i> Перейти до каталогу
+    </button>
+  </div>
+
+  <!-- Cart Items -->
+  <div *ngIf="cartItems.length > 0" class="cart-container">
+    <div class="row">
+      <!-- Items List -->
+      <div class="col-lg-8">
+        <div class="cart-items">
+          <div class="cart-item" *ngFor="let item of cartItems">
+            <div class="item-info">
+              <h5>{{ item.offer.ingredient?.name }}</h5>
+              <p class="text-muted mb-1">{{ item.offer.supplier?.companyName }}</p>
+              <p class="price">{{ item.offer.price }} грн / {{ item.offer.ingredient?.unitOfMeasure }}</p>
+            </div>
+
+            <div class="item-quantity">
+              <label>Кількість:</label>
+              <div class="quantity-controls">
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  (click)="updateQuantity(item, item.quantity - 1)"
+                  [disabled]="item.quantity <= item.offer.minOrderQuantity"
+                >
+                  <i class="bi bi-dash"></i>
+                </button>
+                <input
+                  type="number"
+                  class="form-control form-control-sm text-center"
+                  [value]="item.quantity"
+                  (change)="updateQuantity(item, $any($event.target).value)"
+                  [min]="item.offer.minOrderQuantity"
+                  [max]="item.offer.availableQuantity"
+                >
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  (click)="updateQuantity(item, item.quantity + 1)"
+                  [disabled]="item.quantity >= item.offer.availableQuantity"
+                >
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+              <small class="text-muted">
+                Мін: {{ item.offer.minOrderQuantity }} | Макс: {{ item.offer.availableQuantity }}
+              </small>
+            </div>
+
+            <div class="item-subtotal">
+              <span class="subtotal-label">Сума:</span>
+              <span class="subtotal-value">{{ item.subtotal | number:'1.2-2' }} грн</span>
+            </div>
+
+            <button class="btn btn-outline-danger btn-sm remove-btn" (click)="removeItem(item.offer.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="cart-actions">
+          <button class="btn btn-outline-secondary" (click)="continueShopping()">
+            <i class="bi bi-arrow-left"></i> Продовжити покупки
+          </button>
+          <button class="btn btn-outline-danger" (click)="clearCart()">
+            <i class="bi bi-trash"></i> Очистити кошик
+          </button>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-lg-4">
+        <div class="order-summary">
+          <h4><i class="bi bi-receipt"></i> Підсумок замовлення</h4>
+
+          <div class="summary-details">
+            <div class="summary-row">
+              <span>Товарів:</span>
+              <span>{{ cartItems.length }}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Загальна сума:</span>
+              <span>{{ cartTotal | number:'1.2-2' }} грн</span>
+            </div>
+          </div>
+
+          <!-- Checkout Form -->
+          <div *ngIf="!showCheckoutForm">
+            <button class="btn btn-success btn-lg w-100" (click)="proceedToCheckout()">
+              <i class="bi bi-bag-check"></i> Оформити замовлення
+            </button>
+          </div>
+
+          <div *ngIf="showCheckoutForm" class="checkout-form">
+            <h5><i class="bi bi-geo-alt"></i> Адреса доставки</h5>
+            <textarea
+              class="form-control mb-3"
+              rows="3"
+              [(ngModel)]="deliveryAddress"
+              placeholder="Введіть повну адресу доставки..."
+            ></textarea>
+
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-success btn-lg"
+                (click)="submitOrder()"
+                [disabled]="submitting || !deliveryAddress.trim()"
+              >
+                <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!submitting" class="bi bi-check-circle"></i>
+                {{ submitting ? 'Оформлення...' : 'Підтвердити замовлення' }}
+              </button>
+              <button class="btn btn-outline-secondary" (click)="cancelCheckout()">
+                Скасувати
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p><i class="bi bi-c-circle"></i> 2025 FoodMarket. Всі права захищені.</p>
+  </div>
+</footer>

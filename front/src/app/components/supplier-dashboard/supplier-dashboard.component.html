@@ -1,0 +1,358 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/supplier">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Кнопка Logout -->
+        <li class="nav-item me-3">
+          <button class="btn btn-outline-light btn-sm" (click)="logout()">
+            <i class="bi bi-box-arrow-right"></i> Вийти
+          </button>
+        </li>
+
+        <!-- User dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="user-avatar me-2">{{ getUserInitials() }}</div>
+            <span>{{ currentUser?.email || 'Supplier' }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Профіль</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-building"></i> Моя компанія</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer;">
+                <i class="bi bi-box-arrow-right"></i> Вийти
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-title">
+      <i class="bi bi-tags"></i> Мої пропозиції
+    </h1>
+    <p class="text-muted mb-0">Керуйте своїми пропозиціями та створюйте нові</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container main-content">
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = null"></button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Existing Offers List -->
+  <div class="offers-section">
+    <h2 class="section-title">
+      <i class="bi bi-list-ul"></i> Поточні пропозиції
+      <span class="badge bg-secondary ms-2">{{ myOffers.length }}</span>
+    </h2>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Завантаження...</span>
+      </div>
+      <p class="mt-3">Завантаження пропозицій...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && myOffers.length === 0" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <h3>У вас ще немає пропозицій</h3>
+      <p>Створіть першу пропозицію, використовуючи форму нижче</p>
+    </div>
+
+    <!-- Offers Grid -->
+    <div class="row" *ngIf="!loading && myOffers.length > 0">
+      <div class="col-lg-6" *ngFor="let offer of myOffers">
+        <div class="offer-card" [class.inactive]="!offer.isActive">
+          <div class="offer-header">
+            <div>
+              <h3 class="offer-title">{{ offer.ingredient?.name || 'Невідомий продукт' }}</h3>
+              <span class="badge bg-secondary">{{ offer.ingredient?.category?.name || 'Без категорії' }}</span>
+            </div>
+            <span class="offer-status" [class.active]="offer.isActive" [class.inactive]="!offer.isActive">
+              <i class="bi" [class.bi-check-circle]="offer.isActive" [class.bi-x-circle]="!offer.isActive"></i>
+              {{ offer.isActive ? 'Активна' : 'Неактивна' }}
+            </span>
+          </div>
+
+          <div class="offer-details">
+            <div class="detail-item">
+              <span class="detail-label">Ціна за {{ offer.ingredient?.unitOfMeasure || 'од.' }}</span>
+              <span class="detail-value price-value">{{ offer.price }} грн</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Доступно</span>
+              <span class="detail-value">{{ offer.availableQuantity }} {{ offer.ingredient?.unitOfMeasure || 'од.' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Мін. замовлення</span>
+              <span class="detail-value">{{ offer.minOrderQuantity }} {{ offer.ingredient?.unitOfMeasure || 'од.' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Термін дії</span>
+              <span class="detail-value" [class.text-danger]="isOfferExpired(offer)">
+                <ng-container *ngIf="offer.validUntil; else noDate">
+                  {{ isOfferExpired(offer) ? 'Прострочено' : 'до ' + (offer.validUntil | date:'dd.MM.yyyy') }}
+                </ng-container>
+                <ng-template #noDate>Не вказано</ng-template>
+              </span>
+            </div>
+          </div>
+
+          <div class="offer-actions">
+            <button class="btn btn-edit" (click)="editOffer(offer.id)">
+              <i class="bi bi-pencil"></i> Редагувати
+            </button>
+            <button *ngIf="offer.isActive" class="btn btn-deactivate" (click)="deactivateOffer(offer.id)">
+              <i class="bi bi-x-circle"></i> Деактивувати
+            </button>
+            <button *ngIf="!offer.isActive" class="btn btn-activate" (click)="activateOffer(offer.id)">
+              <i class="bi bi-check-circle"></i> Активувати
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create New Ingredient Form -->
+  <div class="create-form-section">
+    <h2 class="section-title">
+      <i class="bi bi-box-seam"></i> Створити новий інгредієнт
+    </h2>
+
+    <form (ngSubmit)="createIngredient()" #ingredientForm="ngForm">
+      <div class="row">
+        <!-- Name -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-tag"></i> Назва інгредієнта *
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newIngredient.name"
+            name="ingredientName"
+            placeholder="Наприклад: Томати свіжі"
+            required
+          >
+        </div>
+
+        <!-- Category -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-grid"></i> Категорія *
+          </label>
+          <select
+            class="form-select"
+            [(ngModel)]="newIngredient.categoryId"
+            name="ingredientCategory"
+            required
+          >
+            <option [ngValue]="null">Оберіть категорію...</option>
+            <option *ngFor="let category of categories" [ngValue]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Unit of Measure -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-rulers"></i> Одиниця виміру *
+          </label>
+          <select
+            class="form-select"
+            [(ngModel)]="newIngredient.unitOfMeasure"
+            name="ingredientUnit"
+            required
+          >
+            <option value="">Оберіть одиницю...</option>
+            <option *ngFor="let unit of unitsOfMeasure" [value]="unit">{{ unit }}</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-text-left"></i> Опис
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newIngredient.description"
+            name="ingredientDescription"
+            placeholder="Короткий опис інгредієнта"
+          >
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-end mt-3">
+        <button
+          type="submit"
+          class="btn btn-create"
+          [disabled]="ingredientSubmitting || !newIngredient.name || !newIngredient.categoryId || !newIngredient.unitOfMeasure"
+        >
+          <span *ngIf="ingredientSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!ingredientSubmitting" class="bi bi-plus-circle"></i>
+          {{ ingredientSubmitting ? 'Створення...' : 'Створити інгредієнт' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Create New Offer Form -->
+  <div class="create-form-section mt-4">
+    <h2 class="section-title">
+      <i class="bi bi-plus-circle"></i> Створити нову пропозицію
+    </h2>
+
+    <form (ngSubmit)="createOffer()" #offerForm="ngForm">
+      <div class="row">
+        <!-- Ingredient -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-box"></i> Інгредієнт *
+          </label>
+          <select
+            class="form-select"
+            [(ngModel)]="newOffer.ingredientId"
+            name="offerIngredient"
+            required
+          >
+            <option [ngValue]="null">Оберіть інгредієнт...</option>
+            <option *ngFor="let ingredient of ingredients" [ngValue]="ingredient.id">
+              {{ ingredient.name }} ({{ ingredient.unitOfMeasure }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Price -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-currency-dollar"></i> Ціна за одиницю (грн) *
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="newOffer.price"
+            name="offerPrice"
+            step="0.01"
+            min="0.01"
+            placeholder="25.50"
+            required
+          >
+        </div>
+
+        <!-- Available Quantity -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-stack"></i> Доступна кількість *
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="newOffer.availableQuantity"
+            name="offerQuantity"
+            step="0.01"
+            min="0.01"
+            placeholder="1000"
+            required
+          >
+        </div>
+
+        <!-- Min Order Quantity -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-cart-check"></i> Мінімальна кількість замовлення *
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="newOffer.minOrderQuantity"
+            name="offerMinQuantity"
+            step="0.01"
+            min="0.01"
+            placeholder="10"
+            required
+          >
+        </div>
+
+        <!-- Valid From -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-calendar"></i> Дійсна з
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="newOffer.validFrom"
+            name="offerValidFrom"
+          >
+        </div>
+
+        <!-- Valid Until -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            <i class="bi bi-calendar-check"></i> Дійсна до
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="newOffer.validUntil"
+            name="offerValidUntil"
+          >
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-end mt-4">
+        <button
+          type="submit"
+          class="btn btn-create"
+          [disabled]="offerSubmitting || !newOffer.ingredientId || !newOffer.price || !newOffer.availableQuantity || !newOffer.minOrderQuantity"
+        >
+          <span *ngIf="offerSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!offerSubmitting" class="bi bi-plus-circle"></i>
+          {{ offerSubmitting ? 'Створення...' : 'Створити пропозицію' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <p>
+        <i class="bi bi-c-circle"></i> 2025 FoodMarket. Всі права захищені.
+      </p>
+    </div>
+  </div>
+</footer>

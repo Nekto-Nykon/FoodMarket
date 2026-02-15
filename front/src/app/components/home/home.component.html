@@ -1,0 +1,87 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" routerLink="/">
+      <i class="bi bi-shop"></i> FoodMarket
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/login" (click)="onLoginClick()">
+            <i class="bi bi-box-arrow-in-right"></i> Вхід
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/register" (click)="onRegisterClick()">
+            <i class="bi bi-person-plus"></i>  Реєстрація
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero-section">
+  <div class="container">
+    <h1>🎯 FoodMarket</h1>
+    <p>B2B платформа оптової торгівлі продуктами харчування</p>
+  </div>
+</div>
+
+<!-- Categories Section -->
+<div class="categories-section">
+  <div class="container">
+    <h2 class="section-title">Наші категорії продукції</h2>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Завантаження...</span>
+      </div>
+      <p class="mt-3">Завантаження категорій...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="alert alert-danger" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+    </div>
+
+    <!-- Categories Grid -->
+    <div *ngIf="!loading && !error" class="row g-4">
+      <div *ngFor="let category of categories" class="col-lg-4 col-md-6">
+        <div class="card category-card">
+          <div class="card-header">
+            {{ category.name }}
+          </div>
+          <div class="card-body">
+            <p class="card-text">
+              {{ category.description || 'Опис категорії відсутній' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="categories.length === 0" class="col-12">
+        <div class="alert alert-info text-center" role="alert">
+          <i class="bi bi-info-circle"></i> Категорії відсутні в базі даних.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <p>
+        <i class="bi bi-c-circle"></i> 2025 FoodMarket. Всі права захищені.
+      </p>
+    </div>
+  </div>
+</footer>
