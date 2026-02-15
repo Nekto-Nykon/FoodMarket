@@ -15,9 +15,7 @@ import java.util.Optional;
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecificationExecutor<Offer> {
 
-    /**
-     * Отримати всі offers з повними даними supplier, ingredient та category
-     */
+
     @Query("SELECT o FROM Offer o " +
             "LEFT JOIN FETCH o.supplier " +
             "LEFT JOIN FETCH o.ingredient i " +
@@ -25,9 +23,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
             "WHERE (:isActive IS NULL OR o.isActive = :isActive)")
     List<Offer> findAllWithDetails(@Param("isActive") Boolean isActive);
 
-    /**
-     * Отримати offer по ID з повними даними
-     */
+
     @Query("SELECT o FROM Offer o " +
             "LEFT JOIN FETCH o.supplier " +
             "LEFT JOIN FETCH o.ingredient i " +
@@ -35,9 +31,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long>, JpaSpecific
             "WHERE o.id = :id")
     Optional<Offer> findByIdWithDetails(@Param("id") Long id);
 
-    /**
-     * Отримати offers постачальника з повними даними
-     */
+
     @Query("SELECT o FROM Offer o " +
             "LEFT JOIN FETCH o.supplier " +
             "LEFT JOIN FETCH o.ingredient i " +
